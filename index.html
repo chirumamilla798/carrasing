@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Racing Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #score { position: absolute; top: 10px; left: 10px; color: white; font-size: 20px; }
+        #lives { position: absolute; top: 40px; left: 10px; color: white; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div id="score">Score: 0</div>
+    <div id="lives">Lives: 5</div>
+    <script>
+        let scene, camera, renderer, car, track, score = 0, lives = 5, obstacles = [];
+        let moveLeft = false, moveRight = false, moveForward = false;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+            
+            const light = new THREE.AmbientLight(0xffffff);
+            scene.add(light);
+
+            const carGeometry = new THREE.BoxGeometry(1, 0.5, 2);
+            const carMaterial = new THREE.MeshBasicMaterial({ color: 'red' });
+            car = new THREE.Mesh(carGeometry, carMaterial);
+            car.position.z = 5;
+            scene.add(car);
+            
+            const trackGeometry = new THREE.PlaneGeometry(10, 50);
+            const trackMaterial = new THREE.MeshBasicMaterial({ color: 'gray', side: THREE.DoubleSide });
+            track = new THREE.Mesh(trackGeometry, trackMaterial);
+            track.rotation.x = -Math.PI / 2;
+            track.position.y = -0.5;
+            scene.add(track);
+            
+            camera.position.set(0, 5, 10);
+            camera.lookAt(car.position);
+
+            for (let i = 0; i < 5; i++) {
+                let obstacleGeometry = new THREE.BoxGeometry(1, 1, 1);
+                let obstacleMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
+                let obstacle = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
+                obstacle.position.set((Math.random() - 0.5) * 8, 0, -Math.random() * 20);
+                scene.add(obstacle);
+                obstacles.push(obstacle);
+            }
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "ArrowLeft") moveLeft = true;
+                if (event.key === "ArrowRight") moveRight = true;
+                if (event.key === "ArrowUp") moveForward = true;
+            });
+            document.addEventListener("keyup", (event) => {
+                if (event.key === "ArrowLeft") moveLeft = false;
+                if (event.key === "ArrowRight") moveRight = false;
+                if (event.key === "ArrowUp") moveForward = false;
+            });
+            
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (moveLeft && car.position.x > -4) car.position.x -= 0.1;
+            if (moveRight && car.position.x < 4) car.position.x += 0.1;
+            if (moveForward && car.position.z > -20) car.position.z -= 0.1;
+            
+            track.position.z += 0.1;
+            if (track.position.z > 5) track.position.z = 0;
+            
+            obstacles.forEach(obstacle => {
+                obstacle.position.z += 0.1;
+                if (obstacle.position.z > 5) {
+                    obstacle.position.z = -Math.random() * 20;
+                    obstacle.position.x = (Math.random() - 0.5) * 8;
+                }
+                if (car.position.distanceTo(obstacle.position) < 1) {
+                    lives--;
+                    document.getElementById("lives").innerText = "Lives: " + lives;
+                    if (lives <= 0) {
+                        alert("Game Over! Your Score: " + score);
+                        document.location.reload();
+                    }
+                }
+            });
+            
+            score++;
+            document.getElementById("score").innerText = "Score: " + score;
+            
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>
