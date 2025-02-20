@@ -26,7 +26,7 @@
             const light = new THREE.AmbientLight(0xffffff);
             scene.add(light);
 
-            const carTexture = new THREE.TextureLoader().load('https://github.com/chirumamilla798/audio-hosting/raw/main/car04.png');
+            const carTexture = new THREE.TextureLoader().load('https://github.com/chirumamilla798/carrasing/raw/main/car04.png');
             const carGeometry = new THREE.BoxGeometry(1, 0.5, 2);
             const carMaterial = new THREE.MeshBasicMaterial({ map: carTexture });
             car = new THREE.Mesh(carGeometry, carMaterial);
